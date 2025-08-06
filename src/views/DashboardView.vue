@@ -18,6 +18,12 @@
         </div>
       </div>
 
+      <div class="spinner-container" v-if="isLoading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+
       <div class="content-header">
         <div class="content-header-intro"></div>
 
@@ -35,7 +41,6 @@
       </div>
 
       <div class="content">
-
         <div class="content-panel">
           <div class="vertical-tabs">
             <a href="#"
@@ -199,6 +204,26 @@
       </div>
     </div>
   </div>
+
+  <div
+    class="toast align-items-center text-white bg-primary border-0 position-fixed bottom-0 end-0 m-3"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    ref="toast"
+    style="z-index: 1055; min-width: 250px;"
+  >
+    <div class="d-flex">
+      <div class="toast-body">{{ toastMessage }}</div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+        @click="hideToast"
+      ></button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -206,8 +231,14 @@ import HeaderComponent from '@/components/HeaderComponent.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {ref, onMounted, watch} from 'vue'
 
-import {Modal} from 'bootstrap'
+import {Modal, Toast} from 'bootstrap'
 import axios from 'axios'
+
+const toastMessage = ref('')
+const toastInstance = ref<InstanceType<typeof Toast> | null>(null)
+const toast = ref<HTMLElement | null>(null)
+
+const isLoading = ref(false)
 
 const searchTerm = ref('')
 
@@ -224,6 +255,8 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 
 const fetchTravelRequests = async (page = 1) => {
+  isLoading.value = true
+
   try {
     const token = localStorage.getItem('access_token')
     const params: any = {
@@ -248,12 +281,28 @@ const fetchTravelRequests = async (page = 1) => {
     totalPages.value = response.data.meta.last_page
   } catch (error) {
     console.error('Erro ao buscar solicitações de viagem:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
 onMounted(() => {
   fetchTravelRequests()
+
+  if (toast.value) {
+    toastInstance.value = new Toast(toast.value, {delay: 3000})
+  }
 })
+
+
+function showToast(message: string) {
+  toastMessage.value = message
+  toastInstance.value?.show()
+}
+
+function hideToast() {
+  toastInstance.value?.hide()
+}
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
@@ -305,6 +354,7 @@ const submitRequest = async () => {
 
     if (response?.status === 201) {
       await fetchTravelRequests()
+      showToast(response?.data?.message || 'Solicitação criada com sucesso.')
       closeModal()
     }
   } catch (err: any) {
@@ -327,8 +377,6 @@ const submitEdit = async () => {
     const {status, ...rest} = editData.value
     editData.value = {...rest}
 
-    console.warn(editData.value)
-
     const token = localStorage.getItem('access_token')
     const response = await axios.put(
       `http://localhost:8000/api/travel-requests/${editData.value.id}`,
@@ -342,12 +390,12 @@ const submitEdit = async () => {
 
     if (response?.status === 200) {
       await fetchTravelRequests()
-      alert(response?.data?.message)
+      showToast(response?.data?.message || 'Solicitação atualizada com sucesso.')
       editModalInstance.hide()
     }
   } catch (error) {
     console.error('Erro ao atualizar:', error)
-    alert('Erro ao atualizar solicitação.')
+    showToast('Erro ao atualizar solicitação.')
   }
 }
 </script>
@@ -378,5 +426,12 @@ const submitEdit = async () => {
 .modal.show {
   display: block;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
 }
 </style>
