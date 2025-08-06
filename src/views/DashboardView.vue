@@ -105,7 +105,7 @@
       :apiBaseUrl="apiBaseUrl"
       @solicitacao-criada="handleSolicitacao"/>
 
-    <notificacao-modal/>
+    <notificacao-modal @updateSearchTerm="handleUpdateSearchTerm"/>
   </main>
 </template>
 
@@ -206,6 +206,12 @@ const handleDateChange = () => {
     currentPage.value = 1
     fetchTravelRequests()
   }
+}
+
+function handleUpdateSearchTerm(id: string) {
+  searchTerm.value = id;
+  currentPage.value = 1;
+  fetchTravelRequests();
 }
 </script>
 

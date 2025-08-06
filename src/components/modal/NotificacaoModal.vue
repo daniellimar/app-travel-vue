@@ -23,8 +23,8 @@
                 <small class="text-muted">{{ formatDate(notification.created_at) }}</small><br/>
                 <small class="text-muted">
                   Protocolo:
-                  <a :href="`/travel-requests/${notification.data.travel_request_id}`"
-                     target="_blank" rel="noopener noreferrer">
+                  <a href="#"
+                     @click.prevent="searchByProtocol(notification.data.travel_request_id)">
                     {{ notification.data.travel_request_id }}
                   </a>
                 </small>
@@ -93,6 +93,13 @@ async function markAsRead(notificationId: string) {
   } catch (error) {
     toast.error('Erro ao marcar notificação como lida.')
   }
+}
+
+const emit = defineEmits(['updateSearchTerm']);
+
+function searchByProtocol(travelRequestId: string) {
+  modalInstance?.hide();
+  emit('updateSearchTerm', travelRequestId);
 }
 </script>
 
