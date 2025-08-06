@@ -10,7 +10,6 @@
         </a>
       </div>
 
-
       <div class="header-navigation">
         <nav class="header-navigation-links"></nav>
 
@@ -72,7 +71,6 @@
   </main>
 </template>
 
-
 <script setup lang="ts">
 import {ref} from 'vue'
 import axios from 'axios'
@@ -91,7 +89,6 @@ const handleLogin = async () => {
     const token = response.data.access_token
     localStorage.setItem('access_token', token)
 
-    // Redireciona para página protegida
     window.location.href = '/dashboard'
   } catch (err: any) {
     error.value = 'Email ou senha inválidos'
