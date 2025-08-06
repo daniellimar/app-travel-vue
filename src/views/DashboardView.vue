@@ -234,6 +234,8 @@ import {ref, onMounted, watch} from 'vue'
 import {Modal, Toast} from 'bootstrap'
 import axios from 'axios'
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+
 const toastMessage = ref('')
 const toastInstance = ref<InstanceType<typeof Toast> | null>(null)
 const toast = ref<HTMLElement | null>(null)
@@ -266,7 +268,7 @@ const fetchTravelRequests = async (page = 1) => {
       params.status = selectedStatus.value
     }
 
-    const response = await axios.get('http://localhost:8000/api/travel-requests', {
+    const response = await axios.get(`${apiBaseUrl}/travel-requests`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -293,7 +295,6 @@ onMounted(() => {
     toastInstance.value = new Toast(toast.value, {delay: 3000})
   }
 })
-
 
 function showToast(message: string) {
   toastMessage.value = message
@@ -346,7 +347,7 @@ const submitRequest = async () => {
   try {
     const token = localStorage.getItem('access_token')
 
-    const response = await axios.post('http://localhost:8000/api/travel-requests', form.value, {
+    const response = await axios.get(`${apiBaseUrl}/travel-requests`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -379,7 +380,7 @@ const submitEdit = async () => {
 
     const token = localStorage.getItem('access_token')
     const response = await axios.put(
-      `http://localhost:8000/api/travel-requests/${editData.value.id}`,
+      `${apiBaseUrl}/travel-requests/${editData.value.id}`,
       editData.value,
       {
         headers: {
