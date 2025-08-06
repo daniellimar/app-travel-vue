@@ -92,11 +92,13 @@
           @solicitacao-atualizada="handleSolicitacao"/>
       </div>
 
-      <pagination-component
-        :currentPage="currentPage"
-        :totalPages="totalPages"
-        @update:currentPage="currentPage = $event"
-      />
+      <div class="pagination-wrapper">
+        <pagination-component
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
+      </div>
     </div>
 
     <solicitacao-adicionar-modal
@@ -271,5 +273,11 @@ const handleDateChange = () => {
   align-items: center;
   gap: 1rem;
   padding: 0.5rem 0;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: right;
+  margin-right: 2em;
 }
 </style>
