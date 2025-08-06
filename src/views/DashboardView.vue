@@ -114,7 +114,7 @@ const selectedStatus = ref('')
 const currentPage = ref(1)
 const totalPages = ref(1)
 
-const fetchTravelRequests = async (page = 1) => {
+const fetchTravelRequests = async (): Promise<void> => {
   isLoading.value = true
 
   try {
