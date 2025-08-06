@@ -9,12 +9,37 @@
         <div class="search">
           <input
             type="text"
-            placeholder="Pesquisar"
+            placeholder="Pesquisar destino, solicitante..."
             v-model="searchTerm"
           />
+
           <button type="button" @click="fetchTravelRequests">
             <i class="ph-magnifying-glass-bold"></i>
           </button>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="filtro">
+        <div class="filters-date-range">
+          <label>
+            De:
+            <input
+              type="date"
+              v-model="dateRange.start"
+              @change="handleDateChange"
+            />
+          </label>
+
+          <label>
+            Até:
+            <input
+              type="date"
+              v-model="dateRange.end"
+              @change="handleDateChange"
+            />
+          </label>
         </div>
       </div>
 
@@ -30,7 +55,7 @@
         <div class="content-header-actions">
           <a href="#" class="button">
             <i class="ph-faders-bold"></i>
-            <span>Filters</span>
+            <span>Filtros</span>
           </a>
 
           <a href="#"
@@ -104,6 +129,7 @@ axios.interceptors.response.use(
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const isLoading = ref(false)
 const searchTerm = ref('')
+const dateRange = ref<{ start?: string; end?: string }>({})
 
 const travelRequests = ref<{
   id: number;
@@ -137,7 +163,9 @@ const fetchTravelRequests = async (): Promise<void> => {
       params: {
         page: currentPage.value,
         status: selectedStatus.value,
-        search: searchTerm.value || undefined
+        search: searchTerm.value || undefined,
+        start_range: dateRange.value.start || undefined,
+        end_range: dateRange.value.end || undefined,
       }
     });
 
@@ -161,11 +189,19 @@ watch([selectedStatus, currentPage], () => {
 const setStatus = (status: string) => {
   selectedStatus.value = status
   currentPage.value = 1
+  fetchTravelRequests()
 }
 
 const handleSolicitacao = () => {
-  fetchTravelRequests();
-};
+  fetchTravelRequests()
+}
+
+const handleDateChange = () => {
+  if (dateRange.value.start && dateRange.value.end) {
+    currentPage.value = 1
+    fetchTravelRequests()
+  }
+}
 </script>
 
 <style scoped>
@@ -183,18 +219,57 @@ const handleSolicitacao = () => {
   color: #4c6ef5;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 1rem;
-  gap: 0.5rem;
-}
-
 .spinner-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 200px;
+}
+
+.filters-date-range {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+
+    input[type="date"] {
+      margin-top: 0.25rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        border-color: #4c6ef5;
+        outline: none;
+        box-shadow: 0 0 3px rgba(76, 110, 245, 0.5);
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    label {
+      width: 100%;
+    }
+  }
+}
+
+.filtro {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
 }
 </style>
