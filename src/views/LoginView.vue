@@ -9,20 +9,6 @@
           @Travel
         </a>
       </div>
-
-      <div class="header-navigation">
-        <nav class="header-navigation-links"></nav>
-
-        <div class="header-navigation-actions">
-          <a href="#" class="button">
-            <span>Cadastre-se</span>
-          </a>
-        </div>
-      </div>
-
-      <a href="#" class="button">
-        <span>Cadastre-se</span>
-      </a>
     </div>
   </header>
 
