@@ -24,7 +24,7 @@
                 <small class="text-muted">
                   Protocolo:
                   <a href="#"
-                     @click.prevent="searchByProtocol(notification.data.travel_request_id)">
+                     @click.prevent="searchByProtocol(String(notification.data.travel_request_id))">
                     {{ notification.data.travel_request_id }}
                   </a>
                 </small>
