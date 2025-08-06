@@ -115,33 +115,12 @@
 
     <solicitacao-editar-modal :apiBaseUrl="apiBaseUrl" :editData="editData" />
   </main>
-
-  <div
-    class="toast align-items-center text-white bg-primary border-0 position-fixed bottom-0 end-0 m-3"
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-    ref="toast"
-    style="z-index: 1055; min-width: 250px;"
-  >
-    <div class="d-flex">
-      <div class="toast-body">{{ toastMessage }}</div>
-      <button
-        type="button"
-        class="btn-close btn-close-white me-2 m-auto"
-        data-bs-dismiss="toast"
-        aria-label="Close"
-        @click="hideToast"
-      ></button>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
 import HeaderComponent from '@/components/HeaderComponent.vue'
 import {ref, onMounted, watch} from 'vue'
 
-import {Modal, Toast} from 'bootstrap'
 import axios from 'axios'
 import SolicitacaoAdicionarModal from "@/components/modal/SolicitacaoAdicionarModal.vue";
 import SolicitacaoEditarModal from "@/components/modal/SolicitacaoEditarModal.vue";
@@ -159,10 +138,6 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
-const toastMessage = ref('')
-const toastInstance = ref<InstanceType<typeof Toast> | null>(null)
-const toast = ref<HTMLElement | null>(null)
 
 const isLoading = ref(false)
 const searchTerm = ref('')
@@ -214,15 +189,7 @@ const fetchTravelRequests = async (page = 1) => {
 
 onMounted(() => {
   fetchTravelRequests()
-
-  if (toast.value) {
-    toastInstance.value = new Toast(toast.value, {delay: 3000})
-  }
 })
-
-function hideToast() {
-  toastInstance.value?.hide()
-}
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
