@@ -33,10 +33,14 @@
             <span>Filters</span>
           </a>
 
-          <a href="#" class="button" @click="showModal = true">
+          <a href="#"
+             class="button"
+             data-bs-toggle="modal"
+             data-bs-target="#createModal">
             <i class="ph-plus-bold"></i>
             <span>Nova solicitação</span>
           </a>
+
         </div>
       </div>
 
@@ -106,104 +110,11 @@
         </button>
       </div>
     </div>
+
+    <solicitacao-adicionar-modal :apiBaseUrl="apiBaseUrl"/>
+
+    <solicitacao-editar-modal :apiBaseUrl="apiBaseUrl" :editData="editData" />
   </main>
-
-  <!-- Modal de Edição -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
-       aria-hidden="true" ref="editModal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form @submit.prevent="submitEdit">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editModalLabel">Editar Solicitação</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="Fechar"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="applicant_name" class="form-label">Nome</label>
-              <input type="text" id="applicant_name" v-model="editData.applicant_name"
-                     class="form-control" required/>
-            </div>
-            <div class="mb-3">
-              <label for="destination" class="form-label">Destino</label>
-              <input type="text" id="destination" v-model="editData.destination"
-                     class="form-control" required/>
-            </div>
-            <div class="mb-3">
-              <label for="start_date" class="form-label">Data Início</label>
-              <input type="date" id="start_date" v-model="editData.start_date" class="form-control"
-                     required/>
-            </div>
-            <div class="mb-3">
-              <label for="end_date" class="form-label">Data Fim</label>
-              <input type="date" id="end_date" v-model="editData.end_date" class="form-control"
-                     required/>
-            </div>
-
-            <!--            Somente admin pode alterar o status-->
-            <!--            <div class="mb-3">-->
-            <!--              <label for="status" class="form-label">Status</label>-->
-            <!--              <select id="status" v-model="editData.status" class="form-select" required>-->
-            <!--                <option value="solicitado">Solicitado</option>-->
-            <!--                <option value="aprovado">Aprovado</option>-->
-            <!--                <option value="cancelado">Cancelado</option>-->
-            <!--              </select>-->
-            <!--            </div>-->
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar
-            </button>
-            <button type="submit" class="btn btn-primary">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" :class="{ show: showModal }" style="display: block;" tabindex="-1"
-       v-if="showModal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Nova Solicitação</h5>
-          <button type="button" class="btn-close" @click="closeModal"></button>
-        </div>
-
-        <form @submit.prevent="submitRequest">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="applicant_name" class="form-label">Nome do Solicitante</label>
-              <input v-model="form.applicant_name" type="text" class="form-control" required/>
-            </div>
-
-            <div class="mb-3">
-              <label for="destination" class="form-label">Destino</label>
-              <input v-model="form.destination" type="text" class="form-control" required/>
-            </div>
-
-            <div class="mb-3">
-              <label for="start_date" class="form-label">Data de Início</label>
-              <input v-model="form.start_date" type="date" class="form-control" required/>
-            </div>
-
-            <div class="mb-3">
-              <label for="end_date" class="form-label">Data de Término</label>
-              <input v-model="form.end_date" type="date" class="form-control" required/>
-            </div>
-
-            <div v-if="formError" class="alert alert-danger">{{ formError }}</div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeModal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <div
     class="toast align-items-center text-white bg-primary border-0 position-fixed bottom-0 end-0 m-3"
@@ -228,11 +139,12 @@
 
 <script setup lang="ts">
 import HeaderComponent from '@/components/HeaderComponent.vue'
-import 'bootstrap/dist/css/bootstrap.min.css'
 import {ref, onMounted, watch} from 'vue'
 
 import {Modal, Toast} from 'bootstrap'
 import axios from 'axios'
+import SolicitacaoAdicionarModal from "@/components/modal/SolicitacaoAdicionarModal.vue";
+import SolicitacaoEditarModal from "@/components/modal/SolicitacaoEditarModal.vue";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
@@ -253,7 +165,6 @@ const toastInstance = ref<InstanceType<typeof Toast> | null>(null)
 const toast = ref<HTMLElement | null>(null)
 
 const isLoading = ref(false)
-
 const searchTerm = ref('')
 
 const travelRequests = ref<{
@@ -264,6 +175,7 @@ const travelRequests = ref<{
   end_date: string;
   status: string;
 }[]>([])
+
 const selectedStatus = ref('')
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -308,11 +220,6 @@ onMounted(() => {
   }
 })
 
-function showToast(message: string) {
-  toastMessage.value = message
-  toastInstance.value?.show()
-}
-
 function hideToast() {
   toastInstance.value?.hide()
 }
@@ -332,83 +239,10 @@ const setStatus = (status: string) => {
   currentPage.value = 1
 }
 
-const showModal = ref(false)
-const formError = ref('')
-const form = ref({
-  applicant_name: '',
-  destination: '',
-  start_date: '',
-  end_date: '',
-  status: ''
-})
-
-const closeModal = () => {
-  showModal.value = false
-  formError.value = ''
-  form.value = {
-    applicant_name: '',
-    destination: '',
-    start_date: '',
-    end_date: '',
-    status: ''
-  }
-}
-
-const submitRequest = async () => {
-  try {
-    const token = localStorage.getItem('access_token')
-
-    const response = await axios.get(`${apiBaseUrl}/travel-requests`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-
-    if (response?.status === 201) {
-      await fetchTravelRequests()
-      showToast(response?.data?.message || 'Solicitação criada com sucesso.')
-      closeModal()
-    }
-  } catch (err: any) {
-    formError.value = err.response?.data?.message || 'Erro ao criar solicitação.'
-  }
-}
-
 const editData = ref<any>({})
-let editModalInstance: Modal
 
 const openEditModal = (item: any) => {
   editData.value = {...item}
-  const modalEl = document.getElementById('editModal')!
-  editModalInstance = new Modal(modalEl)
-  editModalInstance.show()
-}
-
-const submitEdit = async () => {
-  try {
-    const {status, ...rest} = editData.value
-    editData.value = {...rest}
-
-    const token = localStorage.getItem('access_token')
-    const response = await axios.put(
-      `${apiBaseUrl}/travel-requests/${editData.value.id}`,
-      editData.value,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-
-    if (response?.status === 200) {
-      await fetchTravelRequests()
-      showToast(response?.data?.message || 'Solicitação atualizada com sucesso.')
-      editModalInstance.hide()
-    }
-  } catch (error) {
-    console.error('Erro ao atualizar:', error)
-    showToast('Erro ao atualizar solicitação.')
-  }
 }
 </script>
 
