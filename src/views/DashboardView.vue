@@ -62,28 +62,14 @@
           </div>
         </div>
 
-        <SolicitacaoTable :travelRequests="travelRequests" />
+        <solicitacao-table :travelRequests="travelRequests"/>
       </div>
 
-      <div class="pagination">
-        <button
-          class="btn btn-outline-primary btn-sm"
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >
-          Anterior
-        </button>
-
-        <span class="mx-2">Página {{ currentPage }} de {{ totalPages }}</span>
-
-        <button
-          class="btn btn-outline-primary btn-sm"
-          :disabled="currentPage === totalPages"
-          @click="currentPage++"
-        >
-          Próxima
-        </button>
-      </div>
+      <pagination-component
+        :currentPage="currentPage"
+        :totalPages="totalPages"
+        @update:currentPage="currentPage = $event"
+      />
     </div>
 
     <solicitacao-adicionar-modal :apiBaseUrl="apiBaseUrl"/>
@@ -97,6 +83,7 @@ import {ref, onMounted, watch} from 'vue'
 import axios from 'axios'
 import SolicitacaoAdicionarModal from "@/components/modal/SolicitacaoAdicionarModal.vue";
 import SolicitacaoTable from "@/components/table/SolicitacaoTable.vue";
+import PaginationComponent from "@/components/pagination/PaginationComponent.vue";
 
 // ✅ Interceptador global para 401
 axios.interceptors.response.use(
