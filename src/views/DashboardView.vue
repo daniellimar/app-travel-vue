@@ -26,7 +26,8 @@
             <i class="ph-faders-bold"></i>
             <span>Filters</span>
           </a>
-          <a href="#" class="button">
+
+          <a href="#" class="button" @click="showModal = true">
             <i class="ph-plus-bold"></i>
             <span>Nova solicitação</span>
           </a>
@@ -60,6 +61,7 @@
             <th>Data Início</th>
             <th>Data Fim</th>
             <th>Status</th>
+            <th>Ação</th>
           </tr>
           </thead>
           <tbody>
@@ -69,6 +71,11 @@
             <td>{{ formatDate(item.start_date) }}</td>
             <td>{{ formatDate(item.end_date) }}</td>
             <td class="text-capitalize">{{ item.status }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" @click="openEditModal(item)">
+                Editar
+              </button>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -95,12 +102,111 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal de Edição -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
+       aria-hidden="true" ref="editModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form @submit.prevent="submitEdit">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Editar Solicitação</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="applicant_name" class="form-label">Nome</label>
+              <input type="text" id="applicant_name" v-model="editData.applicant_name"
+                     class="form-control" required/>
+            </div>
+            <div class="mb-3">
+              <label for="destination" class="form-label">Destino</label>
+              <input type="text" id="destination" v-model="editData.destination"
+                     class="form-control" required/>
+            </div>
+            <div class="mb-3">
+              <label for="start_date" class="form-label">Data Início</label>
+              <input type="date" id="start_date" v-model="editData.start_date" class="form-control"
+                     required/>
+            </div>
+            <div class="mb-3">
+              <label for="end_date" class="form-label">Data Fim</label>
+              <input type="date" id="end_date" v-model="editData.end_date" class="form-control"
+                     required/>
+            </div>
+
+            <!--            Somente admin pode alterar o status-->
+            <!--            <div class="mb-3">-->
+            <!--              <label for="status" class="form-label">Status</label>-->
+            <!--              <select id="status" v-model="editData.status" class="form-select" required>-->
+            <!--                <option value="solicitado">Solicitado</option>-->
+            <!--                <option value="aprovado">Aprovado</option>-->
+            <!--                <option value="cancelado">Cancelado</option>-->
+            <!--              </select>-->
+            <!--            </div>-->
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" :class="{ show: showModal }" style="display: block;" tabindex="-1"
+       v-if="showModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nova Solicitação</h5>
+          <button type="button" class="btn-close" @click="closeModal"></button>
+        </div>
+
+        <form @submit.prevent="submitRequest">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="applicant_name" class="form-label">Nome do Solicitante</label>
+              <input v-model="form.applicant_name" type="text" class="form-control" required/>
+            </div>
+
+            <div class="mb-3">
+              <label for="destination" class="form-label">Destino</label>
+              <input v-model="form.destination" type="text" class="form-control" required/>
+            </div>
+
+            <div class="mb-3">
+              <label for="start_date" class="form-label">Data de Início</label>
+              <input v-model="form.start_date" type="date" class="form-control" required/>
+            </div>
+
+            <div class="mb-3">
+              <label for="end_date" class="form-label">Data de Término</label>
+              <input v-model="form.end_date" type="date" class="form-control" required/>
+            </div>
+
+            <div v-if="formError" class="alert alert-danger">{{ formError }}</div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import HeaderComponent from '@/components/HeaderComponent.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {ref, onMounted, watch} from 'vue'
+
+import {Modal} from 'bootstrap'
 import axios from 'axios'
 
 const searchTerm = ref('')
@@ -145,19 +251,13 @@ const fetchTravelRequests = async (page = 1) => {
   }
 }
 
-const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
-    fetchTravelRequests(page)
-  }
-}
-
 onMounted(() => {
   fetchTravelRequests()
 })
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
+  const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('pt-BR')
 }
 
@@ -168,6 +268,87 @@ watch([selectedStatus, currentPage], () => {
 const setStatus = (status: string) => {
   selectedStatus.value = status
   currentPage.value = 1
+}
+
+
+const showModal = ref(false)
+const formError = ref('')
+const form = ref({
+  applicant_name: '',
+  destination: '',
+  start_date: '',
+  end_date: '',
+  status: ''
+})
+
+const closeModal = () => {
+  showModal.value = false
+  formError.value = ''
+  form.value = {
+    applicant_name: '',
+    destination: '',
+    start_date: '',
+    end_date: '',
+    status: ''
+  }
+}
+
+const submitRequest = async () => {
+  try {
+    const token = localStorage.getItem('access_token')
+
+    const response = await axios.post('http://localhost:8000/api/travel-requests', form.value, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (response?.status === 201) {
+      await fetchTravelRequests()
+      closeModal()
+    }
+  } catch (err: any) {
+    formError.value = err.response?.data?.message || 'Erro ao criar solicitação.'
+  }
+}
+
+const editData = ref<any>({})
+let editModalInstance: Modal
+
+const openEditModal = (item: any) => {
+  editData.value = {...item}
+  const modalEl = document.getElementById('editModal')!
+  editModalInstance = new Modal(modalEl)
+  editModalInstance.show()
+}
+
+const submitEdit = async () => {
+  try {
+    const {status, ...rest} = editData.value
+    editData.value = {...rest}
+
+    console.warn(editData.value)
+
+    const token = localStorage.getItem('access_token')
+    const response = await axios.put(
+      `http://localhost:8000/api/travel-requests/${editData.value.id}`,
+      editData.value,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (response?.status === 200) {
+      await fetchTravelRequests()
+      alert(response?.data?.message)
+      editModalInstance.hide()
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar:', error)
+    alert('Erro ao atualizar solicitação.')
+  }
 }
 </script>
 
@@ -192,5 +373,10 @@ const setStatus = (status: string) => {
   align-items: center;
   margin-top: 1rem;
   gap: 0.5rem;
+}
+
+.modal.show {
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 </style>
