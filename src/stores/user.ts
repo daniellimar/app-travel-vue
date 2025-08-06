@@ -9,6 +9,18 @@ interface User {
   role: string;
 }
 
+interface Notification {
+  id: string;
+  data: {
+    message: string;
+    status: string;
+    travel_request_id: number;
+    destination: string;
+  };
+  read_at: string | null;
+  created_at: string;
+}
+
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export const useUserStore = defineStore('user', {
@@ -16,6 +28,7 @@ export const useUserStore = defineStore('user', {
     user: null as User | null,
     isAdmin: false,
     loading: false,
+    notifications: [] as Notification[],
   }),
 
   actions: {
@@ -50,6 +63,23 @@ export const useUserStore = defineStore('user', {
         return null;
       } finally {
         this.loading = false;
+      }
+    },
+
+    async fetchNotifications() {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      try {
+        const response = await axios.get<Notification[]>(`${apiBaseUrl}/notificacoes`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        this.notifications = response.data;
+      } catch (error: any) {
+        toast.error('Erro ao buscar notificações.');
       }
     },
   },

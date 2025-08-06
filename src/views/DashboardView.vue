@@ -104,6 +104,8 @@
     <solicitacao-adicionar-modal
       :apiBaseUrl="apiBaseUrl"
       @solicitacao-criada="handleSolicitacao"/>
+
+    <notificacao-modal/>
   </main>
 </template>
 
@@ -115,6 +117,7 @@ import axios from 'axios'
 import SolicitacaoAdicionarModal from "@/components/modal/SolicitacaoAdicionarModal.vue";
 import SolicitacaoTable from "@/components/table/SolicitacaoTable.vue";
 import PaginationComponent from "@/components/pagination/PaginationComponent.vue";
+import NotificacaoModal from "@/components/modal/NotificacaoModal.vue";
 
 // ✅ Interceptador global para 401
 axios.interceptors.response.use(
