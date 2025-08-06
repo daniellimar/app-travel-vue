@@ -16,11 +16,8 @@
         </nav>
 
         <div class="header-navigation-actions">
-          <a href="#" class="icon-button">
-            <i class="ph-gear-bold"></i>
-          </a>
-          <a href="#" class="icon-button">
-            <i class="ph-bell-bold"></i>
+          <a href="#" class="icon-button" title="Sair" @click.prevent="logout">
+            <i class="ph-sign-out-bold"></i>
           </a>
           <a href="#" class="avatar">
             <img src="https://assets.codepen.io/285131/hat-man.png" alt=""/>
@@ -28,13 +25,23 @@
         </div>
       </div>
 
-      <a href="#" class="button">
-        <i class="ph-list-bold"></i>
-        <span>Menu</span>
+      <a href="#" class="button" @click.prevent="logout">
+        <i class="ph-sign-out-bold"></i>
+        <span>Sair</span>
       </a>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
+
+function logout() {
+  localStorage.removeItem('access_token')
+
+  router.push('/login')
+}
+
 </script>
