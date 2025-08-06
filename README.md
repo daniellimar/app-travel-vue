@@ -11,8 +11,8 @@
 ```bash
 git clone https://github.com/daniellimar/app-travel-vue.git
 cd app-travel-vue
-cp .env.example .env
-docker-compose up -d
+Renomeie o arquivo de .env.example para .env
+docker compose up -d
 ```
 
 ### Serviço disponível na Porta: 8089
