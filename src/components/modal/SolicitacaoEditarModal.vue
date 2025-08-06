@@ -36,15 +36,14 @@
                      required/>
             </div>
 
-            <!--            Somente admin pode alterar o status-->
-            <!--            <div class="mb-3">-->
-            <!--              <label for="status" class="form-label">Status</label>-->
-            <!--              <select id="status" v-model="editData.status" class="form-select" required>-->
-            <!--                <option value="solicitado">Solicitado</option>-->
-            <!--                <option value="aprovado">Aprovado</option>-->
-            <!--                <option value="cancelado">Cancelado</option>-->
-            <!--              </select>-->
-            <!--            </div>-->
+            <div class="mb-3" v-if="isAdmin">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" v-model="editData.status" class="form-select" required>
+                <option value="solicitado" disabled>Solicitado</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
 
           </div>
           <div class="modal-footer">
@@ -63,6 +62,36 @@ import {onMounted, ref, watch} from 'vue';
 import {Modal} from 'bootstrap';
 import axios from 'axios';
 import {toast} from 'vue3-toastify';
+import type {User} from "@/types/user.ts";
+
+const isAdmin = ref(false);
+
+const fetchUser = async (): Promise<User | null> => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const response = await axios.get<User>(`${apiBaseUrl}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const user = response.data;
+    isAdmin.value = user.role === 'admin';
+
+    return user;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      toast.error('Erro ao buscar dados do usuário.');
+    } else {
+      toast.error('Erro inesperado ao buscar dados do usuário.');
+    }
+    return null;
+  }
+};
 
 const props = defineProps(['editData', 'apiBaseUrl']);
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
@@ -71,6 +100,8 @@ const modalRef = ref<HTMLElement | null>(null);
 let modalInstance: Modal;
 
 onMounted(() => {
+  fetchUser();
+
   if (modalRef.value) {
     modalInstance = new Modal(modalRef.value);
   }
@@ -92,11 +123,16 @@ const fecharModal = () => {
 
 const submitEdit = async () => {
   try {
-    const {status, ...rest} = props.editData;
-    const data = {...rest};
+    let data = props.editData;
+
+    if (!isAdmin.value) {
+      const {status, ...rest} = props.editData;
+      data = {...rest};
+    }
+
     const token = localStorage.getItem('access_token');
 
-    const response = await axios.put(`${apiBaseUrl}/travel-requests/${data.id}`, data, {
+    const response = await axios.put(`${apiBaseUrl}/travel-requests/${data?.id}`, data, {
       headers: {Authorization: `Bearer ${token}`},
     });
 
