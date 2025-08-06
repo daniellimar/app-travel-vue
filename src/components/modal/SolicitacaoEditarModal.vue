@@ -73,6 +73,8 @@ let modalInstance: Modal;
 const userStore = useUserStore();
 const isAdmin = computed(() => userStore.isAdmin);
 
+const emit = defineEmits(['solicitacao-atualizada']);
+
 onMounted(() => {
   userStore.fetchUser();
 
@@ -112,6 +114,9 @@ const submitEdit = async () => {
 
     if (response.status === 200) {
       toast.success(response.data.message || 'Solicitação atualizada com sucesso.');
+
+      emit('solicitacao-atualizada');
+
       fecharModal();
     }
   } catch (error: any) {

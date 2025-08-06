@@ -52,6 +52,7 @@ import {Modal} from "bootstrap";
 import {onMounted, ref} from "vue";
 import {toast} from "vue3-toastify";
 
+const emit = defineEmits(['solicitacao-criada']);
 const {apiBaseUrl} = defineProps(['apiBaseUrl'])
 
 const form = ref({
@@ -84,6 +85,8 @@ const submitRequest = async () => {
 
     if (response.status === 201) {
       toast.success(response.data.message || 'Solicitação criada com sucesso.');
+
+      emit('solicitacao-criada');
 
       fecharModal();
     }

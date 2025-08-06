@@ -26,7 +26,9 @@
     </tbody>
   </table>
 
-  <solicitacao-editar-modal :editData="editData"/>
+  <solicitacao-editar-modal
+    :editData="editData"
+    @solicitacao-atualizada="emitEventSolicitacaoAtualizada"/>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +37,8 @@ import SolicitacaoEditarModal from "@/components/modal/SolicitacaoEditarModal.vu
 import EditSVGComponent from "@/components/svg/EditSVGComponent.vue";
 
 defineProps(['travelRequests'])
+
+const emit = defineEmits(['solicitacao-atualizada']);
 
 const editData = ref<any>({})
 const openEditModal = (item: any) => {
@@ -45,6 +49,10 @@ const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
   const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('pt-BR')
+}
+
+const emitEventSolicitacaoAtualizada = (dateStr: string) => {
+  emit('solicitacao-atualizada');
 }
 </script>
 

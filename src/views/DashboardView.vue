@@ -62,7 +62,9 @@
           </div>
         </div>
 
-        <solicitacao-table :travelRequests="travelRequests"/>
+        <solicitacao-table
+          :travelRequests="travelRequests"
+          @solicitacao-atualizada="handleSolicitacao"/>
       </div>
 
       <pagination-component
@@ -72,7 +74,9 @@
       />
     </div>
 
-    <solicitacao-adicionar-modal :apiBaseUrl="apiBaseUrl"/>
+    <solicitacao-adicionar-modal
+      :apiBaseUrl="apiBaseUrl"
+      @solicitacao-criada="handleSolicitacao"/>
   </main>
 </template>
 
@@ -158,6 +162,10 @@ const setStatus = (status: string) => {
   selectedStatus.value = status
   currentPage.value = 1
 }
+
+const handleSolicitacao = () => {
+  fetchTravelRequests();
+};
 </script>
 
 <style scoped>
