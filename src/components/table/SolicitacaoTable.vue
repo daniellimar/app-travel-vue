@@ -19,7 +19,7 @@
       <td class="text-capitalize">{{ item.status }}</td>
       <td>
         <button class="btn btn-sm btn-outline-primary" @click="openEditModal(item)">
-          Editar
+          <edit-s-v-g-component/>
         </button>
       </td>
     </tr>
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import SolicitacaoEditarModal from "@/components/modal/SolicitacaoEditarModal.vue";
+import EditSVGComponent from "@/components/svg/EditSVGComponent.vue";
 
 defineProps(['travelRequests'])
 
@@ -46,3 +47,9 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('pt-BR')
 }
 </script>
+
+<style scoped>
+button.btn:hover .edit-icon {
+  fill: #ffffff;
+}
+</style>
