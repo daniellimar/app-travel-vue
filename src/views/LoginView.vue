@@ -65,9 +65,11 @@ const email = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const handleLogin = async () => {
   try {
-    const response = await axios.post('http://localhost:8000/api/login', {
+    const response = await axios.post(`${apiBaseUrl}/login`, {
       email: email.value,
       password: password.value,
     })
