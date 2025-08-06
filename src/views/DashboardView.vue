@@ -236,6 +236,18 @@ import axios from 'axios'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
+// ✅ Interceptador global para 401
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('access_token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
 const toastMessage = ref('')
 const toastInstance = ref<InstanceType<typeof Toast> | null>(null)
 const toast = ref<HTMLElement | null>(null)
@@ -319,7 +331,6 @@ const setStatus = (status: string) => {
   selectedStatus.value = status
   currentPage.value = 1
 }
-
 
 const showModal = ref(false)
 const formError = ref('')
