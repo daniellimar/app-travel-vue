@@ -62,32 +62,7 @@
           </div>
         </div>
 
-        <table class="table table-hover display" id="integration-table">
-          <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Destino</th>
-            <th>Data Início</th>
-            <th>Data Fim</th>
-            <th>Status</th>
-            <th>Ação</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="item in travelRequests" :key="item.id">
-            <td>{{ item.applicant_name }}</td>
-            <td>{{ item.destination }}</td>
-            <td>{{ formatDate(item.start_date) }}</td>
-            <td>{{ formatDate(item.end_date) }}</td>
-            <td class="text-capitalize">{{ item.status }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary" @click="openEditModal(item)">
-                Editar
-              </button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <SolicitacaoTable :travelRequests="travelRequests" />
       </div>
 
       <div class="pagination">
@@ -112,8 +87,6 @@
     </div>
 
     <solicitacao-adicionar-modal :apiBaseUrl="apiBaseUrl"/>
-
-    <solicitacao-editar-modal :apiBaseUrl="apiBaseUrl" :editData="editData" />
   </main>
 </template>
 
@@ -123,9 +96,7 @@ import {ref, onMounted, watch} from 'vue'
 
 import axios from 'axios'
 import SolicitacaoAdicionarModal from "@/components/modal/SolicitacaoAdicionarModal.vue";
-import SolicitacaoEditarModal from "@/components/modal/SolicitacaoEditarModal.vue";
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+import SolicitacaoTable from "@/components/table/SolicitacaoTable.vue";
 
 // ✅ Interceptador global para 401
 axios.interceptors.response.use(
@@ -139,6 +110,7 @@ axios.interceptors.response.use(
   }
 )
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const isLoading = ref(false)
 const searchTerm = ref('')
 
@@ -191,12 +163,6 @@ onMounted(() => {
   fetchTravelRequests()
 })
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('pt-BR')
-}
-
 watch([selectedStatus, currentPage], () => {
   fetchTravelRequests()
 }, {immediate: true})
@@ -204,12 +170,6 @@ watch([selectedStatus, currentPage], () => {
 const setStatus = (status: string) => {
   selectedStatus.value = status
   currentPage.value = 1
-}
-
-const editData = ref<any>({})
-
-const openEditModal = (item: any) => {
-  editData.value = {...item}
 }
 </script>
 
@@ -234,11 +194,6 @@ const openEditModal = (item: any) => {
   align-items: center;
   margin-top: 1rem;
   gap: 0.5rem;
-}
-
-.modal.show {
-  display: block;
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .spinner-container {

@@ -65,6 +65,7 @@ import axios from 'axios';
 import {toast} from 'vue3-toastify';
 
 const props = defineProps(['editData', 'apiBaseUrl']);
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
 const modalRef = ref<HTMLElement | null>(null);
 let modalInstance: Modal;
@@ -95,7 +96,7 @@ const submitEdit = async () => {
     const data = {...rest};
     const token = localStorage.getItem('access_token');
 
-    const response = await axios.put(`${props.apiBaseUrl}/travel-requests/${data.id}`, data, {
+    const response = await axios.put(`${apiBaseUrl}/travel-requests/${data.id}`, data, {
       headers: {Authorization: `Bearer ${token}`},
     });
 
