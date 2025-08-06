@@ -58,40 +58,11 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import {Modal} from 'bootstrap';
 import axios from 'axios';
 import {toast} from 'vue3-toastify';
-import type {User} from "@/types/user.ts";
-
-const isAdmin = ref(false);
-
-const fetchUser = async (): Promise<User | null> => {
-  const token = localStorage.getItem('access_token');
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const response = await axios.get<User>(`${apiBaseUrl}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const user = response.data;
-    isAdmin.value = user.role === 'admin';
-
-    return user;
-  } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      toast.error('Erro ao buscar dados do usuário.');
-    } else {
-      toast.error('Erro inesperado ao buscar dados do usuário.');
-    }
-    return null;
-  }
-};
+import {useUserStore} from '@/stores/user';
 
 const props = defineProps(['editData', 'apiBaseUrl']);
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
@@ -99,8 +70,11 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const modalRef = ref<HTMLElement | null>(null);
 let modalInstance: Modal;
 
+const userStore = useUserStore();
+const isAdmin = computed(() => userStore.isAdmin);
+
 onMounted(() => {
-  fetchUser();
+  userStore.fetchUser();
 
   if (modalRef.value) {
     modalInstance = new Modal(modalRef.value);
@@ -124,9 +98,9 @@ const fecharModal = () => {
 const submitEdit = async () => {
   try {
     let data = props.editData;
+    const {status, ...rest} = props.editData;
 
-    if (!isAdmin.value) {
-      const {status, ...rest} = props.editData;
+    if (!isAdmin.value || props.editData?.status === 'solicitado') {
       data = {...rest};
     }
 
@@ -140,8 +114,8 @@ const submitEdit = async () => {
       toast.success(response.data.message || 'Solicitação atualizada com sucesso.');
       fecharModal();
     }
-  } catch (error) {
-    toast.error('Erro ao atualizar solicitação.');
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message ?? 'Erro ao atualizar solicitação.');
   }
 };
 </script>
