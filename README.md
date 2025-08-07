@@ -14,6 +14,8 @@ cd app-travel-vue
 Renomeie o arquivo de .env.example para .env
 docker compose up -d
 ```
+### Importante: Após rodar o comando```docker compose up -d```, a aplicação já estará totalmente preparada.
+
 
 ### Serviço disponível na Porta: 8089
 
